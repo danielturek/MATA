@@ -1,0 +1,12 @@
+Package: MATA
+Title: Model-Averaged Tail Area Wald (MATA-Wald) Confidence Interval
+Version: 0.3
+Authors@R: person('Daniel', 'Turek', email='dturek@maths.otago.ac.nz',
+    role=c('aut','cre'))
+Description: Calculates Model-Averaged Tail Area Wald (MATA-Wald) confidence
+    intervals, which are constructed using single-model estimators and model
+    weights.
+Depends:
+    R (>= 3.1.3)
+License: GPL-2
+LazyData: true
