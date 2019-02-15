@@ -15,13 +15,14 @@
 #' Bayesian credible interval.  This function returns the lower and upper
 #' confidence limits of a MATA-Wald interval.
 #' 
-#' Two usages are supported.  For the normal linear model,
-#' using option \code{normal.lm = TRUE} generates a MATA-Wald confidence interval
+#' Two usages are supported.  For the normal linear model, or any other model
+#' where a t-based interval is appropriate (e.g., quasi-poisson),
+#' using option \code{mata.t = TRUE} generates a MATA-Wald confidence interval
 #' corresponding to the solutions of equations (2) and (3) of Turek and 
 #' Fletcher (2012).  The argument \code{residual.dfs} is required for this usage.
 #'
 #' When the sampling distribution for the estimator is asymptotically 
-#' normal (e.g. MLEs), possibly after a transformation, use option \code{normal.lm = FALSE}.
+#' normal (e.g. MLEs), possibly after a transformation, use option \code{mata.t = FALSE}.
 #' This generates a MATA-Wald confidence interval, possibly
 #' on a transformed scale, where back-transformation of both confidence limits 
 #' may be necessary.  This corresponds to solutions to the equations in Section 3.2 
@@ -45,19 +46,26 @@
 #'              0.05 to a 90\% interval. Must be between 0 and 0.5.
 #'              Default value is 0.025.
 #' 
-#' @param normal.lm Logical.  TRUE for the normal linear model case, and 
-#'                  FALSE otherwise.  When TRUE, the argument 
-#'                  \code{residual.dfs} must also be supplied.
+#' @param mata.t Logical.  TRUE for the normal linear model case, and 
+#'               FALSE otherwise.  When TRUE, the argument 
+#'               \code{residual.dfs} must also be supplied.
 #' 
 #' @param residual.dfs A vector containing the residual (error) degrees of freedom 
 #'                     under each candidate model.  This argument must be provided 
-#'                     when \code{normal.lm = TRUE}.
+#'                     when \code{mata.t = TRUE}.
+#'
+#' @param normal.lm Provided only for backward-compatibility.  This argument
+#'                  has been deprecated, and replaced by \code{mata.t}.
 #' 
 #' @author Daniel Turek
 #'
 #' @export
 #' 
-#' @references Turek, D. and Fletcher, D. (2012). Model-Averaged Wald Confidence Intervals. Computational Statistics and Data Analysis, 56(9), p.2809-2815.
+#' @references
+#'
+#' Turek, D. and Fletcher, D. (2012). Model-Averaged Wald Confidence Intervals. Computational Statistics and Data Analysis, 56(9), p.2809-2815.
+#'
+#' Fletcher, D. (2018). Model Averaging. Berlin, Heidelberg: Springer Briefs in Statistics.
 #' 
 #' @examples
 #'# Normal linear prediction:
@@ -100,36 +108,37 @@
 #'
 #'#  95% MATA-Wald confidence interval for theta (model-averaging)
 #'mata.wald(theta.hats=theta.hats, se.theta.hats=se.theta.hats, 
-#'         model.weights=model.weights, normal.lm=TRUE, residual.dfs=residual.dfs)
-mata.wald = function(theta.hats, se.theta.hats, model.weights, normal.lm, residual.dfs, alpha=0.025) {
+#'         model.weights=model.weights, mata.t=TRUE, residual.dfs=residual.dfs)
+mata.wald = function(theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs, alpha=0.025, normal.lm) {
     if(length(theta.hats) != length(se.theta.hats))    stop('dimension mismatch in arguments')
     if(length(theta.hats) != length(model.weights))    stop('dimension mismatch in arguments')
     if(any(se.theta.hats <= 0))                        stop('negative se.theta.hats')
     if(any(model.weights < 0))                         stop('negative model.weights')
     if(abs(sum(model.weights)-1) > 0.001)              stop('model.weights do not sum to 1')
-    if(!is.logical(normal.lm))                         stop('normal.lm must be logical (T/F)')
+    if(!is.logical(mata.t))                            stop('mata.t must be logical (T/F)')
     if((alpha<=0) | (alpha>=0.5))                      stop('alpha outside of meaningful range')
+    if(!missing(normal.lm))                            stop('normal.lm argument has been deprecated, and replaced by \'mata.t\'')
     
-    if(normal.lm) {
-        if(missing(residual.dfs))                        stop('must specify residual.dfs when normal.lm = TRUE')
+    if(mata.t) {
+        if(missing(residual.dfs))                        stop('must specify residual.dfs when mata.t = TRUE')
         if(length(theta.hats) != length(residual.dfs))   stop('dimension mismatch in arguments')
         if(any(residual.dfs <= 0))                       stop('negative residual.dfs')
         if(any(residual.dfs != round(residual.dfs)))     stop('non-integer residual.dfs')
         
-        theta.L = uniroot(f=tailarea.t, interval=c(-1e10, 1e10),
+        theta.L = stats::uniroot(f=tailarea.t, interval=c(-1e10, 1e10),
             theta.hats=theta.hats, se.theta.hats=se.theta.hats, 
             model.weights=model.weights, alpha=alpha, 
             residual.dfs=residual.dfs, tol=1e-10)$root
-        theta.U = uniroot(f=tailarea.t, interval=c(-1e10, 1e10),
+        theta.U = stats::uniroot(f=tailarea.t, interval=c(-1e10, 1e10),
             theta.hats=theta.hats, se.theta.hats=se.theta.hats, 
             model.weights=model.weights, alpha=1-alpha, 
             residual.dfs=residual.dfs, tol=1e-10)$root
     }
-    if(!normal.lm) {
-        theta.L = uniroot(f=tailarea.z, interval=c(-1e10, 1e10), 
+    if(!mata.t) {
+        theta.L = stats::uniroot(f=tailarea.z, interval=c(-1e10, 1e10), 
             theta.hats=theta.hats, se.theta.hats=se.theta.hats, 
             model.weights=model.weights, alpha=alpha, tol=1e-10)$root
-        theta.U = uniroot(f=tailarea.z, interval=c(-1e10, 1e10), 
+        theta.U = stats::uniroot(f=tailarea.z, interval=c(-1e10, 1e10), 
             theta.hats=theta.hats, se.theta.hats=se.theta.hats, 
             model.weights=model.weights, alpha=1-alpha, tol=1e-10)$root
     }
@@ -139,14 +148,14 @@ mata.wald = function(theta.hats, se.theta.hats, model.weights, normal.lm, residu
 
 tailarea.z = function(theta, theta.hats, se.theta.hats, model.weights, alpha) {
     z.quantiles = (theta-theta.hats)/se.theta.hats
-    tailarea = sum(model.weights*pnorm(z.quantiles)) - alpha
+    tailarea = sum(model.weights*stats::pnorm(z.quantiles)) - alpha
     tailarea
 }
 
 
 tailarea.t = function(theta, theta.hats, se.theta.hats, model.weights, alpha, residual.dfs) {
     t.quantiles = (theta-theta.hats)/se.theta.hats
-    tailarea = sum(model.weights*pt(t.quantiles, df=residual.dfs)) - alpha
+    tailarea = sum(model.weights*stats::pt(t.quantiles, df=residual.dfs)) - alpha
     tailarea
 }
 
