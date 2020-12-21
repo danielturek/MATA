@@ -6,32 +6,41 @@
 \alias{tailarea.t}
 \title{Model-Averaged Tail Area Wald (MATA-Wald) Confidence Interval}
 \usage{
-mata.wald(theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs,
-  alpha = 0.025, normal.lm)
+mata.wald(
+  theta.hats,
+  se.theta.hats,
+  model.weights,
+  mata.t,
+  residual.dfs,
+  alpha = 0.025,
+  normal.lm
+)
 }
 \arguments{
-\item{theta.hats}{A numeric vector containing the parameter estimates under each 
+\item{theta.hats}{A numeric vector containing the parameter estimates under each
 candidate model.}
 
-\item{se.theta.hats}{A numeric vector containing the estimated standard error of each 
-value in \code{theta.hats}.}
+\item{se.theta.hats}{A numeric vector containing the estimated standard error of each
+value in \code{theta.hats}.  If an element is zero, this
+corresponds to the parameter being fixed to the value
+give in \code{theta.hats} under a particular candidate model.}
 
-\item{model.weights}{A vector containing the model weights for each candidate 
+\item{model.weights}{A vector containing the model weights for each candidate
 model.  Calculated from an information criterion,
-such as AIC or BIC. 
+such as AIC or BIC.
 All model weights must be non-negative, and sum to one.}
 
-\item{mata.t}{Logical.  TRUE for the normal linear model case, and 
-FALSE otherwise.  When TRUE, the argument 
+\item{mata.t}{Logical.  TRUE for the normal linear model case, and
+FALSE otherwise.  When TRUE, the argument
 \code{residual.dfs} must also be supplied.}
 
-\item{residual.dfs}{A vector containing the residual (error) degrees of freedom 
-under each candidate model.  This argument must be provided 
+\item{residual.dfs}{A vector containing the residual (error) degrees of freedom
+under each candidate model.  This argument must be provided
 when \code{mata.t = TRUE}.}
 
 \item{alpha}{The desired lower and upper error rate.  The value 0.025
-corresponds to a 95\% MATA-Wald confidence interval, and
-0.05 to a 90\% interval. Must be between 0 and 0.5.
+corresponds to a 95\\% MATA-Wald confidence interval, and
+0.05 to a 90\\% interval. Must be between 0 and 0.5.
 Default value is 0.025.}
 
 \item{normal.lm}{Provided only for backward-compatibility.  This argument
@@ -43,7 +52,7 @@ confidence interval, constructed using single-model estimators
 and model weights.
 }
 \details{
-\code{mata.wald} may be used to construct model-averaged 
+\code{mata.wald} may be used to construct model-averaged
 confidence intervals, using the Model-Averaged Tail Area (MATA) construction
 (see Turek and Fletcher (2012) for details).
 The idea underlying this construction is similar to that of a model-averaged
@@ -53,15 +62,22 @@ confidence limits of a MATA-Wald interval.
 Two usages are supported.  For the normal linear model, or any other model
 where a t-based interval is appropriate (e.g., quasi-poisson),
 using option \code{mata.t = TRUE} generates a MATA-Wald confidence interval
-corresponding to the solutions of equations (2) and (3) of Turek and 
+corresponding to the solutions of equations (2) and (3) of Turek and
 Fletcher (2012).  The argument \code{residual.dfs} is required for this usage.
 
-When the sampling distribution for the estimator is asymptotically 
+When the sampling distribution for the estimator is asymptotically
 normal (e.g. MLEs), possibly after a transformation, use option \code{mata.t = FALSE}.
 This generates a MATA-Wald confidence interval, possibly
-on a transformed scale, where back-transformation of both confidence limits 
-may be necessary.  This corresponds to solutions to the equations in Section 3.2 
+on a transformed scale, where back-transformation of both confidence limits
+may be necessary.  This corresponds to solutions to the equations in Section 3.2
 of Turek and Fletcher (2012).
+
+If the parameter is fixed to a certain value under one or more candidate
+models, then the fixed value of the parameter can be provided in the
+\code{theta.hats} argument, along with a corresponding value of zero in
+\code{se.theta.hats}.  This results in a point mass of probability, with
+probability mass mass equal to the corresponding value in \code{model.weights},
+existing at the fixed value of the parameter.
 }
 \examples{
 # Normal linear prediction:

@@ -27,6 +27,13 @@
 #' on a transformed scale, where back-transformation of both confidence limits 
 #' may be necessary.  This corresponds to solutions to the equations in Section 3.2 
 #' of Turek and Fletcher (2012).
+#'
+#' If the parameter is fixed to a certain value under one or more candidate
+#' models, then the fixed value of the parameter can be provided in the
+#' \code{theta.hats} argument, along with a corresponding value of zero in
+#' \code{se.theta.hats}.  This results in a point mass of probability, with
+#' probability mass mass equal to the corresponding value in \code{model.weights},
+#' existing at the fixed value of the parameter.
 #' 
 #' @aliases mata.wald tailarea.z tailarea.t
 #' 
@@ -34,7 +41,9 @@
 #'                   candidate model.
 #'
 #' @param se.theta.hats A numeric vector containing the estimated standard error of each 
-#'                      value in \code{theta.hats}.
+#'                      value in \code{theta.hats}.  If an element is zero, this
+#'                      corresponds to the parameter being fixed to the value
+#'                      give in \code{theta.hats} under a particular candidate model.
 #'
 #' @param model.weights A vector containing the model weights for each candidate 
 #'                      model.  Calculated from an information criterion,
@@ -112,12 +121,14 @@
 mata.wald = function(theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs, alpha=0.025, normal.lm) {
     if(length(theta.hats) != length(se.theta.hats))    stop('dimension mismatch in arguments')
     if(length(theta.hats) != length(model.weights))    stop('dimension mismatch in arguments')
-    if(any(se.theta.hats <= 0))                        stop('negative se.theta.hats')
+    if(any(se.theta.hats < 0))                         stop('negative se.theta.hats')
     if(any(model.weights < 0))                         stop('negative model.weights')
     if(abs(sum(model.weights)-1) > 0.001)              stop('model.weights do not sum to 1')
     if(!is.logical(mata.t))                            stop('mata.t must be logical (T/F)')
     if((alpha<=0) | (alpha>=0.5))                      stop('alpha outside of meaningful range')
     if(!missing(normal.lm))                            stop('normal.lm argument has been deprecated, and replaced by \'mata.t\'')
+
+    se.theta.hats[se.theta.hats == 0] = 0.00000001
     
     if(mata.t) {
         if(missing(residual.dfs))                        stop('must specify residual.dfs when mata.t = TRUE')

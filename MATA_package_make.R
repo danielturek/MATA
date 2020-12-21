@@ -5,7 +5,7 @@ setwd('~/github/MATA')
 
 descList <- list(
     Title = 'Model-Averaged Tail Area Wald (MATA-Wald) Confidence Interval',
-    Version = '0.4',
+    Version = '0.5',
     `Authors@R` = "person('Daniel', 'Turek', email='danielturek@gmail.com', role=c('aut','cre'))",
     Description = 'Calculates Model-Averaged Tail Area Wald (MATA-Wald) confidence intervals, which are constructed using single-model estimators and model weights. See Turek and Fletcher (2012) <doi:10.1016/j.csda.2012.03.002> for details.',
     License = 'GPL-2'
@@ -29,6 +29,7 @@ q('no')
 ## shell: $ R CMD INSTALL MATA_0.2.tar.gz
 ## shell: $ R CMD INSTALL MATA_0.3.tar.gz
 ## shell: $ R CMD INSTALL MATA_0.4.tar.gz
+## shell: $ R CMD INSTALL MATA_0.5.tar.gz
 
 ##setwd('/Users/dturek/Dropbox/Berkeley/R/2_MATA_package')
 setwd('~/github/MATA')
