@@ -1,16 +1,18 @@
 Package: MATA
-Title: Model-Averaged Tail Area Wald (MATA-Wald) Confidence
-    Interval
-Version: 0.5
+Title: Model-Averaged Tail Area (MATA) Confidence Interval and
+    Distribution
+Version: 0.6
 Authors@R: 
     person(given = "Daniel",
            family = "Turek",
            role = c("aut", "cre"),
            email = "danielturek@gmail.com")
 Description: Calculates Model-Averaged Tail Area Wald
-    (MATA-Wald) confidence intervals, which are constructed using
-    single-model estimators and model weights. See Turek and Fletcher
-    (2012) <doi:10.1016/j.csda.2012.03.002> for details.
+    (MATA-Wald) confidence intervals, and MATA-Wald confidence densities
+    and distribtuions, which are constructed using single-model
+    frequentist estimators and model weights. See Turek and Fletcher
+    (2012) <doi:10.1016/j.csda.2012.03.002> and Fletcher et al (2019)
+    <doi:10.1007/s10651-019-00432-5> for details.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

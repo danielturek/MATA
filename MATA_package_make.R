@@ -1,41 +1,37 @@
-
 library(devtools)
-##setwd('/Users/dturek/Dropbox/Berkeley/R/2_MATA_package')
-setwd('~/github/MATA')
+library(roxygen2)
 
-descList <- list(
-    Title = 'Model-Averaged Tail Area Wald (MATA-Wald) Confidence Interval',
-    Version = '0.5',
-    `Authors@R` = "person('Daniel', 'Turek', email='danielturek@gmail.com', role=c('aut','cre'))",
-    Description = 'Calculates Model-Averaged Tail Area Wald (MATA-Wald) confidence intervals, which are constructed using single-model estimators and model weights. See Turek and Fletcher (2012) <doi:10.1016/j.csda.2012.03.002> for details.',
-    License = 'GPL-2'
-)
+baseDir <- '~/github/MATA/'
 
-## removes existing package
-if('MATA' %in% dir()) unlink('MATA', recursive=TRUE, force=TRUE)
+document(paste0(baseDir, 'MATA'))
+document(paste0(baseDir, 'MATA'))
+system(paste0('R CMD BUILD ', baseDir, 'MATA'))
 
-remove.packages('MATA')
-usethis::create_package('MATA', fields=descList, rstudio=FALSE)
+check(paste0(baseDir, 'MATA'))
 
-setwd('~/github/MATA')
-system('cp MATA_package_source.R MATA/R/')
+suppressMessages(try(remove.packages('MATA'), silent = TRUE))
+tarFiles <- grep('\\.tar\\.gz', list.files(baseDir, include.dirs = TRUE), value = TRUE)
+lastTarFile <- tarFiles[length(tarFiles)]
+message('installing package version ', gsub('\\.tar\\.gz$', '', lastTarFile))
+system(paste0('R CMD install ', lastTarFile))
 
-document('MATA')
-build('MATA')
-check('MATA')
 q('no')
 
-## shell: $ R CMD INSTALL MATA_0.1.tar.gz
-## shell: $ R CMD INSTALL MATA_0.2.tar.gz
-## shell: $ R CMD INSTALL MATA_0.3.tar.gz
-## shell: $ R CMD INSTALL MATA_0.4.tar.gz
-## shell: $ R CMD INSTALL MATA_0.5.tar.gz
+## now restart R
 
-##setwd('/Users/dturek/Dropbox/Berkeley/R/2_MATA_package')
-setwd('~/github/MATA')
-library('MATA')
+library(MATA)
 
+?MATA
+?mata
 ?mata.wald
+?dmata.wald
+?pmata.wald
+
+
+mata.wald
+dmata.wald
+pmata.wald
+
 
 
 
