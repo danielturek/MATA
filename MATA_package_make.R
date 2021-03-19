@@ -2,6 +2,7 @@ library(devtools)
 library(roxygen2)
 
 baseDir <- '~/github/MATA/'
+setwd(baseDir)
 
 document(paste0(baseDir, 'MATA'))
 document(paste0(baseDir, 'MATA'))

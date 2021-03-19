@@ -8,7 +8,7 @@
 #'
 #' \code{mata.wald} may be used to construct model-averaged confidence intervals, using the Model-Averaged Tail Area (MATA) construction (see Turek and Fletcher (2012) for details). The idea underlying this construction is similar to that of a model-averaged Bayesian credible interval.  This function returns the lower and upper confidence limits of a MATA-Wald interval.
 #'
-#' Closely related, the \code{dmata.wald} and \code{pmata.wald} functions evaluate the MATA density and distribution functions, respectively.
+#' Closely related, the \code{dmata.wald} and \code{pmata.wald} functions evaluate the MATA confidence density and confidence distribution functions, which were developed by Fletcher et al. (2019).
 #' 
 #' Two usages are supported.  For the normal linear model, or any other model where a t-based interval is appropriate (e.g., quasi-poisson), using option \code{mata.t = TRUE} corresponds to a MATA-Wald confidence interval, density, or distribution corresponding to the solutions of equations (2) and (3) of Turek and Fletcher (2012).  The argument \code{residual.dfs} is required for this usage.
 #'
@@ -28,7 +28,7 @@
 #' 
 #' @param alpha For \code{mata.wald} only, the desired lower and upper error rate. The value 0.025 corresponds to a 95% MATA-Wald confidence interval, and 0.05 to a 90% interval. Must be between 0 and 0.5. Default value is 0.025.
 #'
-#' @param theta For \code{dmata.wald} and \code{pmata.wald} only, the value of theta at which to evaluate the model-averaged confidence density or distribution function.
+#' @param theta For \code{dmata.wald} and \code{pmata.wald} only, a vector of theta values at which to evaluate the model-averaged confidence density or distribution function.
 #' 
 #' @author Daniel Turek
 #'
@@ -42,7 +42,7 @@
 #'
 #' Fletcher, D. (2018). Model Averaging. Berlin, Heidelberg: Springer Briefs in Statistics.
 #'
-#' Fletcher, D, et al (2019). Model-averaged confidence distributions. Environmental and Ecological Statistics, 26: 367–384.
+#' Fletcher, D., Dillingham, P. W., and Zeng, J. (2019). Model-averaged confidence distributions. Environmental and Ecological Statistics, 26: 367–384.
 #' @examples
 #' 
 #'# Normal linear prediction:
@@ -87,12 +87,20 @@
 #'#  95% MATA-Wald confidence interval for theta:
 #'mata.wald(theta.hats, se.theta.hats, model.weights, mata.t = TRUE, residual.dfs = residual.dfs)
 #'
-#'#  Model-averaged confidence density evaluated at theta = 4
-#'dmata.wald(4, theta.hats, se.theta.hats, model.weights, mata.t = TRUE, residual.dfs = residual.dfs)
+#'#  Plot the model-averaged confidence density and distribution functions
+#'#  on the interval [2, 7]
+#'thetas <- seq(2, 7, by = 0.1)
 #' 
-#'#  Model-averaged confidence distribution evaluated at theta = 5
-#'pmata.wald(5, theta.hats, se.theta.hats, model.weights, mata.t = TRUE, residual.dfs = residual.dfs)
-#'
+#'dens <- dmata.wald(thetas, theta.hats, se.theta.hats, model.weights,
+#'                   mata.t = TRUE, residual.dfs = residual.dfs)
+#' 
+#'dists <- pmata.wald(thetas, theta.hats, se.theta.hats, model.weights,
+#'                    mata.t = TRUE, residual.dfs = residual.dfs)
+#' 
+#'par(mfrow = c(2,1))
+#'plot(thetas, dens, type = 'l', main = 'Model-Averaged Confidence Density')
+#'plot(thetas, dists, type = 'l', main = 'Model-Averaged Confidence Distribution')
+#' 
 NULL
 
 
@@ -126,16 +134,20 @@ mata.wald = function(theta.hats, se.theta.hats, model.weights, mata.t, residual.
 #' @export
 dmata.wald = function(theta, theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs) {
     check.arguments(theta.hats=theta.hats, se.theta.hats=se.theta.hats, model.weights=model.weights, mata.t=mata.t, residual.dfs=residual.dfs)
-    dens = 0
-    for(i in seq_along(theta.hats)) {
-        if(se.theta.hats[i] == 0) {
-            if(theta.hats[i] == theta)   dens = dens + model.weights[i]
-        } else {
-            x = (theta - theta.hats[i]) / se.theta.hats[i]
-            dens = dens + model.weights[i] * ifelse(mata.t, stats::dt(x, residual.dfs[i]), stats::dnorm(x)) / se.theta.hats[i]
+    dens_vector = numeric(length(theta))
+    for(i_theta in seq_along(theta)) {
+        dens = 0
+        for(i in seq_along(theta.hats)) {
+            if(se.theta.hats[i] == 0) {
+                if(theta.hats[i] == theta[i_theta])   dens = Inf    ## dens + model.weights[i]
+            } else {
+                x = (theta[i_theta] - theta.hats[i]) / se.theta.hats[i]
+                dens = dens + model.weights[i] * ifelse(mata.t, stats::dt(x, residual.dfs[i]), stats::dnorm(x)) / se.theta.hats[i]
+            }
         }
+        dens_vector[i_theta] = dens
     }
-    dens
+    dens_vector
 }
 
 
@@ -143,35 +155,38 @@ dmata.wald = function(theta, theta.hats, se.theta.hats, model.weights, mata.t, r
 #' @export
 pmata.wald = function(theta, theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs) {
     check.arguments(theta.hats=theta.hats, se.theta.hats=se.theta.hats, model.weights=model.weights, mata.t=mata.t, residual.dfs=residual.dfs)
-    if(any((theta.hats == theta) & (se.theta.hats == 0)))   stop('Model-averaged distribution function is not well-defined at values of theta.hat for which se.theta.hat = 0')
-    cdf = 0
-    for(i in seq_along(theta.hats)) {
-        if(se.theta.hats[i] == 0) {
-            if(theta.hats[i] < theta)   cdf = cdf + model.weights[i]
-        } else {
-            x = (theta - theta.hats[i]) / se.theta.hats[i]
-            cdf = cdf + model.weights[i] * ifelse(mata.t, stats::pt(x, residual.dfs[i]), stats::pnorm(x))
+    cdf_vector = numeric(length(theta))
+    for(i_theta in seq_along(theta)) {
+        cdf = 0
+        for(i in seq_along(theta.hats)) {
+            if(se.theta.hats[i] == 0) {
+                if(theta.hats[i] == theta[i_theta])   cdf = NA      ## cdf + model.weights[i]
+                if(theta.hats[i] <  theta[i_theta])   cdf = cdf + model.weights[i]
+            } else {
+                x = (theta[i_theta] - theta.hats[i]) / se.theta.hats[i]
+                cdf = cdf + model.weights[i] * ifelse(mata.t, stats::pt(x, residual.dfs[i]), stats::pnorm(x))
+            }
         }
-    }
-    cdf
+        cdf_vector[i_theta] = cdf
+        }
+    cdf_vector
 }
 
 
 check.arguments = function(theta.hats, se.theta.hats, model.weights, mata.t, residual.dfs, alpha, mata.ci = FALSE) {
-    if(length(theta.hats) != length(se.theta.hats))    stop('dimension mismatch in arguments')
-    if(length(theta.hats) != length(model.weights))    stop('dimension mismatch in arguments')
-    if(any(se.theta.hats < 0))                         stop('negative se.theta.hats')
-    if(any(model.weights < 0))                         stop('negative model.weights')
-    if(abs(sum(model.weights)-1) > 0.001)              stop('model.weights do not sum to 1')
-    if(!is.logical(mata.t))                            stop('mata.t must be logical')
+    if(length(theta.hats) != length(se.theta.hats))    stop('dimension mismatch in arguments', call. = FALSE)
+    if(length(theta.hats) != length(model.weights))    stop('dimension mismatch in arguments', call. = FALSE)
+    if(any(se.theta.hats < 0))                         stop('negative se.theta.hats', call. = FALSE)
+    if(any(model.weights < 0))                         stop('negative model.weights', call. = FALSE)
+    if(abs(sum(model.weights)-1) > 0.001)              stop('model.weights do not sum to 1', call. = FALSE)
+    if(!is.logical(mata.t))                            stop('mata.t must be logical', call. = FALSE)
     if(mata.t) {
-        if(missing(residual.dfs))                      stop('must specify residual.dfs when mata.t = TRUE')
-        if(length(theta.hats) != length(residual.dfs)) stop('dimension mismatch in arguments')
-        if(any(residual.dfs <= 0))                     stop('negative residual.dfs')
-        if(any(residual.dfs != round(residual.dfs)))   stop('non-integer residual.dfs')
+        if(missing(residual.dfs))                      stop('must specify residual.dfs when mata.t = TRUE', call. = FALSE)
+        if(length(theta.hats) != length(residual.dfs)) stop('dimension mismatch in arguments', call. = FALSE)
+        if(any(residual.dfs <= 0))                     stop('residual.dfs must be positive', call. = FALSE)
     }
     if(mata.ci) {
-        if((alpha<=0) | (alpha>=0.5))                  stop('alpha outside of meaningful range')
+        if((alpha<=0) | (alpha>=0.5))                  stop('alpha outside of meaningful range', call. = FALSE)
     }
 }
 
