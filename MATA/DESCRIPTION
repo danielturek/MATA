@@ -1,7 +1,7 @@
 Package: MATA
 Title: Model-Averaged Tail Area (MATA) Confidence Interval and
     Distribution
-Version: 0.7.0
+Version: 0.7.1
 Authors@R: 
     person(given = "Daniel",
            family = "Turek",

@@ -12,7 +12,7 @@ check(paste0(baseDir, 'MATA'))
 
 suppressMessages(try(remove.packages('MATA'), silent = TRUE))
 tarFiles <- grep('\\.tar\\.gz', list.files(baseDir, include.dirs = TRUE), value = TRUE)
-lastTarFile <- tarFiles[length(tarFiles)]
+(lastTarFile <- tarFiles[length(tarFiles)])
 message('installing package version ', gsub('\\.tar\\.gz$', '', lastTarFile))
 system(paste0('R CMD install ', lastTarFile))
 
@@ -28,10 +28,11 @@ library(MATA)
 ?dmata.wald
 ?pmata.wald
 
-
 mata.wald
 dmata.wald
 pmata.wald
+
+example(MATA)
 
 
 

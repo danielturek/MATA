@@ -40,7 +40,7 @@ pmata.wald(
 
 \item{se.theta.hats}{A numeric vector containing the estimated standard error of each value in \code{theta.hats}.  If an element is zero, this corresponds to the parameter being fixed to the value give in \code{theta.hats} under a particular candidate model.}
 
-\item{model.weights}{A vector containing the model weights for each candidate model.  Calculated from an information criterion, such as AIC or BIC. All model weights must be non-negative, and sum to one.}
+\item{model.weights}{A vector containing the weights for each candidate model (e.g. AIC weights or stacking weights). All model weights must be non-negative, and sum to one.}
 
 \item{mata.t}{Logical.  TRUE for the normal linear model case, and FALSE otherwise.  When TRUE, the argument \code{residual.dfs} must also be supplied.}
 
@@ -56,13 +56,13 @@ Functions for computing the Model-Averaged Tail Area Wald (MATA-Wald) confidence
 \details{
 \code{mata.wald} may be used to construct model-averaged confidence intervals, using the Model-Averaged Tail Area (MATA) construction (see Turek and Fletcher (2012) for details). The idea underlying this construction is similar to that of a model-averaged Bayesian credible interval.  This function returns the lower and upper confidence limits of a MATA-Wald interval.
 
-Closely related, the \code{dmata.wald} and \code{pmata.wald} functions evaluate the MATA confidence density and confidence distribution functions, which were developed by Fletcher et al. (2019).
+Closely related, the \code{dmata.wald} and \code{pmata.wald} functions evaluate the MATA-Wald confidence density and confidence distribution functions, which were developed by Fletcher et al. (2019).
 
 Two usages are supported.  For the normal linear model, or any other model where a t-based interval is appropriate (e.g., quasi-poisson), using option \code{mata.t = TRUE} corresponds to a MATA-Wald confidence interval, density, or distribution corresponding to the solutions of equations (2) and (3) of Turek and Fletcher (2012).  The argument \code{residual.dfs} is required for this usage.
 
 When the sampling distribution for the estimator is asymptotically normal (e.g. MLEs), possibly after a transformation, use option \code{mata.t = FALSE}. This corresponds to solutions to the equations in Section 3.2 of Turek and Fletcher (2012).
 
-If the parameter is fixed to a certain value under one or more candidate models, then the fixed value of the parameter can be provided in the \code{theta.hats} argument, along with a corresponding value of zero in \code{se.theta.hats}.  This results in a point mass of probability, with probability mass mass equal to the corresponding value in \code{model.weights}, existing at the fixed value of the parameter.
+If the parameter is fixed to a certain value under one or more candidate models, this value should be provided in the \code{theta.hats} argument, along with a corresponding value of zero in \code{se.theta.hats}.  For the model-averaged confidence density, this results in a point mass equal to the sum of the weights for these models.
 }
 \examples{
 
