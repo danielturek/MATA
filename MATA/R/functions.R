@@ -16,7 +16,7 @@
 #'
 #' If the parameter is fixed to a certain value under one or more candidate models, this value should be provided in the \code{theta.hats} argument, along with a corresponding value of zero in \code{se.theta.hats}.  For the model-averaged confidence density, this results in a point mass equal to the sum of the weights for these models.
 #' 
-#' @param theta.hats A numeric vector containing the parameter estimates under each  candidate model.
+#' @param theta.hats A numeric vector containing the parameter estimates under each candidate model.
 #' 
 #' @param se.theta.hats A numeric vector containing the estimated standard error of each value in \code{theta.hats}.  If an element is zero, this corresponds to the parameter being fixed to the value give in \code{theta.hats} under a particular candidate model.
 #' 
